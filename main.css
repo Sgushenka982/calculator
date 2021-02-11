@@ -1,0 +1,109 @@
+/*COLOR PALETTE*/
+
+:root{
+    --accent1:#009499; /*Viridiant Green*/
+    --accent2:#FFDA29; /*Vibrant Yellow*/
+
+    --support1:#E1E3E1; /*Light Gray*/
+    --support2:#B5BAb6; /*Storm Gray*/
+    --support3:#7E827F; /*Dark Gray*/
+
+    --whiteish:#F2F0EB; /*Snow White*/
+    --blackish:#212121; /*Blackish*/
+}
+
+/*GENERAL STYLES*/
+
+*, *::before, *::after{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+html{
+    height: 100%;
+}
+
+body{
+    padding: 50px;
+    font-family:'Courier New', Courier, monospace;
+    font-size:1em;
+    background: linear-gradient(200deg,var(--accent2),var(--accent1));
+}
+
+/*CALCULATOR CONTAINER ELEMENT*/
+
+#calculator{
+    width: 332px;
+    padding: 10px;
+    margin: auto;
+    background-color: var(--whiteish);
+    font-size: 1.2rem;
+    border: 1px solid var(--support2);
+    border-radius: 10px;
+    box-shadow: 0px 1px 7px 0px var(--blackish);
+}
+
+/*CALCULATOR SCREEN*/
+
+#display{
+    display: grid;
+    border: 1px solid var(--support2);
+    border-radius:5px;
+    height: 70px;
+    color:var(--blackish);
+}
+
+#display input{
+    display: block;
+    text-align: right;
+    padding: 8px 7px;
+    background: none;
+    border: none;
+    font-size: 0.9rem;
+    color: var(--support3);
+}
+
+#display output{
+    display: block;
+    text-align: right;
+    padding: 0 5px;
+    background: none;
+    font-weight: bold;
+    font-size:2rem;
+}
+
+/*CALCULATOR KEYPAD*/
+#keypad{
+    display: grid;
+    grid-template-columns: auto auto auto auto;
+    grid-gap:10px;
+    padding-top: 10px;
+}
+
+#keypad button{
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border:none;
+    font-family: inherit;
+    font-size: 1.5rem;
+    cursor: pointer;
+    outline: none;
+    background-color: var(--support1);
+}
+
+#keypad button:hover{
+    background: linear-gradient(120deg,var(--support2),var(--support1));
+}
+
+#keypad button.operator{
+    font-weight: bold;
+    font-size: 1.5rem;
+    background-color:var(--accent1) ;
+    color: var(--whiteish);
+}
+
+#keypad button.operator:hover{
+    background: linear-gradient(120deg,var(--blackish),var(--accent1));
+}
