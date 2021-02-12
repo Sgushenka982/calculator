@@ -3,61 +3,51 @@ class Calculator {
         this.inputDisplay = input
         this.outputDisplay = output
         this.inputHistory = []
+        this.outputHistory = []
     }
 
     clearAllHistory() {
+        this.outputHistory = []
         this.inputHistory = []
         this.updateInputDisplay()
         this.updateOutputDisplay('0')
     }
 
     backspace() {
-        switch (this.getLastInputType()) {
-            case 'number':
-                if (this.getLastInputValue().length > 1) {
-                    this.editLastInput(this.getLastInputValue().slice(0, -1), 'number')
-                } else {
-                    this.deleteLastInput()
-                }
-                break
-            case 'operator':
-                this.deleteLastInput()
-                break
-            default:
-                return
+        if (this.getLastOutputType() !== null) {
+            if (this.getLastOutputValue().length > 1) {
+                this.editLastOutput(this.getLastOutputValue().slice(0, -1), 'number')
+            } else {
+                this.deleteLastoutput()
+            }
         }
     }
 
     changePercentToDecimal() {
-        if (this.getLastInputType() === 'number') {
-            this.editLastInput(this.getLastInputValue() / 100, 'number')
+        if (this.getLastOutputType() === 'number') {
+            this.editLastOutput(this.getLastOutputValue() / 100, 'number')
         }
     }
 
     insertNumber(value) {
-        if (this.getLastInputType() === 'number') {
-            this.appendToLastInput(value)
-        } else if (this.getLastInputType() === 'operator' || this.getLastInputType() === null) {
-            this.addNewInput(value, 'number')
+        if (this.getLastOutputType() === null) {
+            this.addNewOutput(value, 'number')
+        } else if (this.getLastOutputType() === 'number') {
+            this.appendToLastOutput(value)
         }
     }
 
     insertOperation(value) {
-        switch (this.getLastInputType()) {
-            case 'number':
-                this.addNewInput(value, 'operator')
-                break
-            case 'operator':
-                this.editLastInput(value, 'operator')
-                break
-            case 'equals':
-                let output = this.getOutputValue()
-                this.clearAllHistory()
-                this.addNewInput(output, 'number')
-                this.addNewInput(value, 'operator')
-                break
-            default:
-                return
+        if (this.getLastInputType() === 'operator' && this.getLastOutputType() !== 'number') {
+            this.editLastInput(value, 'operator')
+        } else if (this.getLastInputType() === 'equals') {
+            let output = this.getOutputValue()
+            this.clearAllHistory()
+            this.addNewInput(output, 'number')
+            this.addNewInput(value, 'operator')
+        } else {
+            this.transitionNumberFromOutputToInput(value)
+            this.addNewInput(value, 'operator')
         }
     }
 
@@ -68,15 +58,16 @@ class Calculator {
     }
 
     insertDecimalPoint() {
-        if (this.getLastInputType() === 'number' && !this.getLastInputValue().includes('.')) {
-            this.appendToLastInput('.')
-        } else if (this.getLastInputType() === 'operator' || this.getLastInputType() === null) {
-            this.addNewInput('0.', 'number')
+        if (this.getLastOutputType() === 'number' && !this.getLastOutputValue().includes('.')) {
+            this.appendToLastOutput('.')
+        } else if (this.getLastOutputType() === 'operator' || this.getLastOutputType() === null) {
+            this.addNewOutput('0.', 'number')
         }
     }
 
     generateResult() {
-        if (this.getLastInputType() === 'number') {
+        if (this.getLastOutputType() === 'number') {
+            this.transitionNumberFromOutputToInput()
             const self = this
             const simplifyExpression = function (currentExpression, operator) {
                 if (currentExpression.indexOf(operator) === -1) {
@@ -86,7 +77,7 @@ class Calculator {
                     let leftOperandIdx = operatorIdx - 1
                     let rightOperatorIdx = operatorIdx + 1
 
-                    let partialSolution = self.performOperation(...currentExpression.slice(leftOperandIdx,rightOperatorIdx+1))
+                    let partialSolution = self.performOperation(...currentExpression.slice(leftOperandIdx, rightOperatorIdx + 1))
 
                     currentExpression.splice(leftOperandIdx, 3, partialSolution.toString())
 
@@ -94,7 +85,7 @@ class Calculator {
                 }
             }
 
-            let result = ['×', '÷', '-', '+'].reduce(simplifyExpression,this.getAllInputValues())
+            let result = ['×', '÷', '-', '+'].reduce(simplifyExpression, this.getAllInputValues())
 
             this.addNewInput('=', 'equals')
             this.updateOutputDisplay(result.toString())
@@ -110,12 +101,25 @@ class Calculator {
         return (this.inputHistory.length === 0) ? null : this.inputHistory[this.inputHistory.length - 1].value
     }
 
+    getLastOutputType() {
+        return (this.outputHistory.length === 0) ? null : this.outputHistory[this.outputHistory.length - 1].type
+    }
+
+    getLastOutputValue() {
+        return (this.outputHistory.length === 0) ? null : this.outputHistory[this.outputHistory.length - 1].value
+    }
+
     getAllInputValues() {
         return this.inputHistory.map(entry => entry.value)
     }
 
     getOutputValue() {
         return this.outputDisplay.value.replace(/,/g, '')
+    }
+
+    addNewOutput(value, type) {
+        this.outputHistory.push({ 'type': type, 'value': value })
+        this.updateOutputDisplay(this.outputHistory[this.outputHistory.length - 1]['value'])
     }
 
     addNewInput(value, type) {
@@ -128,9 +132,31 @@ class Calculator {
         this.updateInputDisplay()
     }
 
+    appendToLastOutput(value) {
+        this.outputHistory[this.outputHistory.length - 1].value += value.toString()
+        this.updateOutputDisplay(this.outputHistory[this.outputHistory.length - 1]['value'])
+    }
+
+    clearOutputHistory() {
+        this.outputHistory = []
+        this.updateOutputDisplay('0')
+    }
+
     editLastInput(value, type) {
         this.inputHistory.pop()
         this.addNewInput(value, type)
+    }
+
+    editLastOutput(value, type) {
+        this.outputHistory.pop()
+        this.addNewOutput(value, type)
+    }
+
+    transitionNumberFromOutputToInput() {
+        let output = this.getLastOutputValue()
+        this.clearOutputHistory()
+        this.addNewInput(output, 'number')
+
     }
 
     deleteLastInput() {
@@ -138,12 +164,17 @@ class Calculator {
         this.updateInputDisplay()
     }
 
+    deleteLastoutput() {
+        this.outputHistory.pop()
+        this.updateOutputDisplay('0')
+    }
+
     updateInputDisplay() {
         this.inputDisplay.value = this.getAllInputValues().join(' ')
     }
 
     updateOutputDisplay(value) {
-        this.outputDisplay.value = Number(value).toLocaleString()
+        this.outputDisplay.value = Number(value).toLocaleString('ru-RU')
     }
 
     performOperation(leftOperand, operation, rightOperand) {
@@ -223,3 +254,4 @@ decimalButton.addEventListener('click', () => {
 equalsButton.addEventListener('click', () => {
     calculator.generateResult()
 })
+
