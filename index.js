@@ -133,8 +133,8 @@ class Calculator {
         this.addNewInput(value, type)
     }
 
-    deletelastInput() {
-        this, this.inputHistory.pop()
+    deleteLastInput() {
+        this.inputHistory.pop()
         this.updateInputDisplay()
     }
 
