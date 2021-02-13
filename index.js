@@ -14,7 +14,9 @@ class Calculator {
     }
 
     backspace() {
-        if (this.getLastOutputType() !== null) {
+        if(this.getLastInputType()==='equals'){
+            this.clearInputHistory()
+        }else if (this.getLastOutputType() !== null) {
             if (this.getLastOutputValue().length > 1) {
                 this.editLastOutput(this.getLastOutputValue().slice(0, -1), 'number')
             } else {
@@ -32,8 +34,11 @@ class Calculator {
     insertNumber(value) {
         if (this.getLastOutputType() === null) {
             this.addNewOutput(value, 'number')
-        } else if (this.getLastOutputType() === 'number') {
+        } else if (this.getLastOutputType() === 'number'&&this.getLastInputType()!=='equals') {
             this.appendToLastOutput(value)
+        }else if (this.getLastInputType()==='equals'){
+            this.clearAllHistory()
+            this.addNewOutput(value, 'number')
         }
     }
 
@@ -52,13 +57,13 @@ class Calculator {
     }
 
     nagationNumber() {
-        if (this.getLastInputType() === 'number') {
-            this.editLastInput(parseFloat(this.getLastInputValue()) * -1, 'number')
+        if (this.getLastOutputType() === 'number') {
+            this.editLastOutput(parseFloat(this.getLastOutputValue()) * -1, 'number')
         }
     }
 
     insertDecimalPoint() {
-        if (this.getLastOutputType() === 'number' && !this.getLastOutputValue().includes('.')) {
+        if (this.getLastOutputType() === 'number' && !this.getLastOutputValue().toString().includes('.')) {
             this.appendToLastOutput('.')
         } else if (this.getLastOutputType() === 'operator' || this.getLastOutputType() === null) {
             this.addNewOutput('0.', 'number')
@@ -88,7 +93,8 @@ class Calculator {
             let result = ['×', '÷', '-', '+'].reduce(simplifyExpression, this.getAllInputValues())
 
             this.addNewInput('=', 'equals')
-            this.updateOutputDisplay(result.toString())
+            this.addNewOutput(result.toString(),'number')
+            //this.updateOutputDisplay(result.toString())
         }
     }
 
@@ -110,7 +116,7 @@ class Calculator {
     }
 
     getAllInputValues() {
-        return this.inputHistory.map(entry => entry.value)
+                return this.inputHistory.map(entry => entry.value)
     }
 
     getOutputValue() {
@@ -142,6 +148,11 @@ class Calculator {
         this.updateOutputDisplay('0')
     }
 
+    clearInputHistory(){
+        this.inputHistory=[]
+        this.updateInputDisplay()
+    }
+
     editLastInput(value, type) {
         this.inputHistory.pop()
         this.addNewInput(value, type)
@@ -150,13 +161,6 @@ class Calculator {
     editLastOutput(value, type) {
         this.outputHistory.pop()
         this.addNewOutput(value, type)
-    }
-
-    transitionNumberFromOutputToInput() {
-        let output = this.getLastOutputValue()
-        this.clearOutputHistory()
-        this.addNewInput(output, 'number')
-
     }
 
     deleteLastInput() {
@@ -169,17 +173,38 @@ class Calculator {
         this.updateOutputDisplay('0')
     }
 
+    howManySignsInFloat(value){
+        return  (value.toString().includes('.'))?(value.toString().split('.').pop().length):(0)
+    }
+
+    longestDecimalPart(number1,number2){
+        if(this.howManySignsInFloat(number1)<this.howManySignsInFloat(number2)){
+            return this.howManySignsInFloat(number2)
+        }else{
+            return this.howManySignsInFloat(number1)
+        }
+        
+    }
+
+    transitionNumberFromOutputToInput() {
+        let output = this.getLastOutputValue()
+        this.clearOutputHistory()
+        this.addNewInput(output, 'number')
+    }
+
     updateInputDisplay() {
         this.inputDisplay.value = this.getAllInputValues().join(' ')
     }
 
     updateOutputDisplay(value) {
-        this.outputDisplay.value = Number(value).toLocaleString('ru-RU')
+        this.outputDisplay.value = value.toLocaleString('ru-RU')   
     }
 
     performOperation(leftOperand, operation, rightOperand) {
         leftOperand = parseFloat(leftOperand)
         rightOperand = parseFloat(rightOperand)
+
+        let howLongToFix= this.longestDecimalPart(leftOperand,rightOperand)
 
         if (Number.isNaN(leftOperand) || Number.isNaN(rightOperand)) {
             return
@@ -187,13 +212,13 @@ class Calculator {
 
         switch (operation) {
             case '×':
-                return leftOperand * rightOperand
+                return (leftOperand * rightOperand).toFixed(howLongToFix)
             case '÷':
-                return leftOperand / rightOperand
+                return (leftOperand / rightOperand).toFixed(howLongToFix)
             case '-':
-                return leftOperand - rightOperand
+                return (leftOperand - rightOperand).toFixed(howLongToFix)
             case '+':
-                return leftOperand + rightOperand
+                return (leftOperand + rightOperand).toFixed(howLongToFix)
             default:
                 return
         }
@@ -254,4 +279,3 @@ decimalButton.addEventListener('click', () => {
 equalsButton.addEventListener('click', () => {
     calculator.generateResult()
 })
-
