@@ -18,7 +18,7 @@ class Calculator {
             this.clearInputHistory()
         } else {
             if (this.getLastOutputType() !== null) {
-                if (this.getLastOutputValue() === 'Infinity' || this.getLastOutputValue() === '-Infinity'|| this.getLastOutputValue() === 'NaN') {
+                if (this.getLastOutputValue() === 'Infinity' || this.getLastOutputValue() === '-Infinity' || this.getLastOutputValue() === 'NaN') {
                     this.clearAllHistory()
                 } else if (this.getLastOutputValue().length > 1) {
                     this.editLastOutput(this.getLastOutputValue().slice(0, -1), 'number')
@@ -39,6 +39,7 @@ class Calculator {
         if (this.getLastOutputType() === null) {
             this.addNewOutput(value, 'number')
         } else if (this.getLastOutputType() === 'number' && this.getLastInputType() !== 'equals') {
+            if (this.getLastOutputValue().length>=14) {return}
             this.appendToLastOutput(value)
         } else if (this.getLastInputType() === 'equals') {
             this.clearAllHistory()
@@ -95,6 +96,8 @@ class Calculator {
             }
 
             let result = ['×', '÷', '-', '+'].reduce(simplifyExpression, this.getAllInputValues())
+
+            
 
             this.addNewInput('=', 'equals')
             this.addNewOutput(result.toString(), 'number')
@@ -157,6 +160,14 @@ class Calculator {
         this.updateInputDisplay()
     }
 
+    checkLengthOfDecimalPart(value){
+        if(this.howManySignsInFloat(value)<=13){
+            return value
+        }else{
+            return value.toFixed(13)
+        }
+    }
+
     editLastInput(value, type) {
         this.inputHistory.pop()
         this.addNewInput(value, type)
@@ -208,6 +219,8 @@ class Calculator {
         leftOperand = parseFloat(leftOperand)
         rightOperand = parseFloat(rightOperand)
 
+        let result = null
+
         let howLongToFix = this.longestDecimalPart(leftOperand, rightOperand)
 
         if (Number.isNaN(leftOperand) || Number.isNaN(rightOperand)) {
@@ -215,20 +228,24 @@ class Calculator {
         }
 
 
-        if (howLongToFix== 0) {
+        if (howLongToFix == 0) {
             switch (operation) {
                 case '×':
-                    return leftOperand * rightOperand
+                    result=leftOperand * rightOperand
+                    return this.checkLengthOfDecimalPart(result)               
                 case '÷':
-                    return leftOperand / rightOperand
+                    result=leftOperand /rightOperand
+                    return this.checkLengthOfDecimalPart(result)
                 case '-':
-                    return leftOperand - rightOperand
+                    result=leftOperand - rightOperand
+                    return this.checkLengthOfDecimalPart(result)
                 case '+':
-                    return leftOperand + rightOperand
+                    result=leftOperand + rightOperand
+                    return this.checkLengthOfDecimalPart(result)
                 default:
                     return
             }
-        }else{
+        } else {
             switch (operation) {
                 case '×':
                     return (leftOperand * rightOperand).toFixed(howLongToFix)
@@ -240,7 +257,8 @@ class Calculator {
                     return (leftOperand + rightOperand).toFixed(howLongToFix)
                 default:
                     return
-        }}
+            }
+        }
     }
 }// End Calculator Class Defenition
 
