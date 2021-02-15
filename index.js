@@ -101,7 +101,12 @@ class Calculator {
 
             this.addNewInput('=', 'equals')
             this.addNewOutput(result.toString(), 'number')
-            //this.updateOutputDisplay(result.toString())
+
+            if(outputDisplay.offsetWidth>310){
+                outputDisplay.style.cssText = 'font-size:1.25rem;'
+            }else{
+                outputDisplay.style['font-size'] = ''
+            }
         }
     }
 
