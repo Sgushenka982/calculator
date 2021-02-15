@@ -53,8 +53,10 @@ class Calculator {
         } else if (this.getLastInputType() === 'equals') {
             let output = this.getOutputValue()
             this.clearAllHistory()
-            this.addNewInput(output, 'number')
-            this.addNewInput(value, 'operator')
+            if (!Number.isNaN(+output)) {
+                this.addNewInput(output, 'number')
+                this.addNewInput(value, 'operator')
+            }
         } else {
             if (this.getLastOutputValue().slice(-1) === '.') {
                 this.editLastOutput(this.getLastOutputValue().slice(0, -1), 'number')
