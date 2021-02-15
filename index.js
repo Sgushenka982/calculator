@@ -39,7 +39,7 @@ class Calculator {
         if (this.getLastOutputType() === null) {
             this.addNewOutput(value, 'number')
         } else if (this.getLastOutputType() === 'number' && this.getLastInputType() !== 'equals') {
-            if (this.getLastOutputValue().length>=14) {return}
+            if (this.getLastOutputValue().length >= 14) { return }
             this.appendToLastOutput(value)
         } else if (this.getLastInputType() === 'equals') {
             this.clearAllHistory()
@@ -56,6 +56,9 @@ class Calculator {
             this.addNewInput(output, 'number')
             this.addNewInput(value, 'operator')
         } else {
+            if (this.getLastOutputValue().slice(-1) === '.') {
+                this.editLastOutput(this.getLastOutputValue().slice(0, -1), 'number')
+            }
             this.transitionNumberFromOutputToInput(value)
             this.addNewInput(value, 'operator')
         }
@@ -77,7 +80,7 @@ class Calculator {
 
     generateResult() {
         if (this.getLastOutputType() === 'number') {
-            if(this.getLastInputType()==='equals'){
+            if (this.getLastInputType() === 'equals') {
                 return
             }
             this.transitionNumberFromOutputToInput()
@@ -100,14 +103,14 @@ class Calculator {
 
             let result = ['×', '÷', '-', '+'].reduce(simplifyExpression, this.getAllInputValues())
 
-            
+
 
             this.addNewInput('=', 'equals')
             this.addNewOutput(result.toString(), 'number')
 
-            if(outputDisplay.offsetWidth>310){
+            if (outputDisplay.offsetWidth > 310) {
                 outputDisplay.style.cssText = 'font-size:1.25rem;'
-            }else{
+            } else {
                 outputDisplay.style['font-size'] = ''
             }
         }
@@ -168,10 +171,10 @@ class Calculator {
         this.updateInputDisplay()
     }
 
-    checkLengthOfDecimalPart(value){
-        if(this.howManySignsInFloat(value)<=13){
+    checkLengthOfDecimalPart(value) {
+        if (this.howManySignsInFloat(value) <= 13) {
             return value
-        }else{
+        } else {
             return value.toFixed(13)
         }
     }
@@ -239,16 +242,16 @@ class Calculator {
         if (howLongToFix == 0) {
             switch (operation) {
                 case '×':
-                    result=leftOperand * rightOperand
-                    return this.checkLengthOfDecimalPart(result)               
+                    result = leftOperand * rightOperand
+                    return this.checkLengthOfDecimalPart(result)
                 case '÷':
-                    result=leftOperand /rightOperand
+                    result = leftOperand / rightOperand
                     return this.checkLengthOfDecimalPart(result)
                 case '-':
-                    result=leftOperand - rightOperand
+                    result = leftOperand - rightOperand
                     return this.checkLengthOfDecimalPart(result)
                 case '+':
-                    result=leftOperand + rightOperand
+                    result = leftOperand + rightOperand
                     return this.checkLengthOfDecimalPart(result)
                 default:
                     return
