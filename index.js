@@ -77,6 +77,9 @@ class Calculator {
 
     generateResult() {
         if (this.getLastOutputType() === 'number') {
+            if(this.getLastInputType()==='equals'){
+                return
+            }
             this.transitionNumberFromOutputToInput()
             const self = this
             const simplifyExpression = function (currentExpression, operator) {
